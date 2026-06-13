@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="config.js"></script>
 <style>
 :root{
   --navy:#071233; --navy2:#0c2a72; --blue:#1f5cff; --ice:#9fc0ff;
@@ -355,7 +356,7 @@ document.getElementById('dl').addEventListener('click',async()=>{
 renderRows();renderCard();
 
 // ── Cargar partidos de hoy desde football-data.org ───────────────────────────
-const FD_TOKEN = '3e4b72d3488e4e1c81f23edf0eb1c7ec';
+// FD_TOKEN se carga desde config.js (ver config.example.js)
 const DIAS  = ['DOMINGO','LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'];
 const MESES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
