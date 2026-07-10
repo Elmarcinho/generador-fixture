@@ -267,6 +267,17 @@ const teamOptions = Object.entries(TEAMS).sort((a,b)=>a[1].localeCompare(b[1]))
 const LABELS = ["GRUPO A","GRUPO B","GRUPO C","GRUPO D","GRUPO E","GRUPO F","GRUPO G","GRUPO H",
  "GRUPO I","GRUPO J","GRUPO K","GRUPO L","DIECISEISAVOS","OCTAVOS DE FINAL","CUARTOS DE FINAL",
  "SEMIFINAL","TERCER PUESTO","FINAL","LLAVE 1","LLAVE 2","LLAVE 3","LLAVE 4"];
+// Traducción de los códigos de fase que manda la API football-data.org
+// fase  = texto para el selector "Fase del torneo" / subtítulo de la tarjeta
+// badge = etiqueta corta que va en el chip de cada partido
+const STAGE_ES = {
+  LAST_32:        { fase:'DIECISEISAVOS DE FINAL', badge:'DIECISEISAVOS' },
+  LAST_16:        { fase:'OCTAVOS DE FINAL',        badge:'OCTAVOS' },
+  QUARTER_FINALS: { fase:'CUARTOS DE FINAL',        badge:'CUARTOS' },
+  SEMI_FINALS:    { fase:'SEMIFINALES',             badge:'SEMIFINAL' },
+  THIRD_PLACE:    { fase:'TERCER PUESTO',           badge:'TERCER PUESTO' },
+  FINAL:          { fase:'GRAN FINAL',              badge:'FINAL' },
+};
 const dl=document.createElement('datalist'); dl.id="lbls";
 dl.innerHTML=LABELS.map(l=>`<option value="${l}">`).join("");
 document.body.appendChild(dl);
@@ -411,10 +422,10 @@ async function fetchTodayFromAPI(mode = 'today') {
       const bolDate = bol.toISOString().slice(0, 10);
       const dia  = `${DIAS[bol.getUTCDay()]} ${bol.getUTCDate()} DE ${MESES[bol.getUTCMonth()]}`;
       const hora = `${String(bol.getUTCHours()).padStart(2,'0')}:${String(bol.getUTCMinutes()).padStart(2,'0')}`;
-      const grp  = m.group ? `GRUPO ${m.group.replace('GROUP_','')}` : (m.stage || 'FIXTURE');
+      const grp  = m.group ? `GRUPO ${m.group.replace('GROUP_','')}` : (STAGE_ES[m.stage]?.badge || m.stage || 'FIXTURE');
       const a    = NAME_TO_CODE[m.homeTeam?.name] || 'xx';
       const b    = NAME_TO_CODE[m.awayTeam?.name] || 'xx';
-      return { grp, a, b, dia, hora, bolDate, matchday: m.matchday || null };
+      return { grp, a, b, dia, hora, bolDate, matchday: m.matchday || null, stage: m.stage || null };
     })
     .filter(m => bolWanted.includes(m.bolDate))
     .map(({ bolDate, ...m }) => m);
@@ -447,9 +458,13 @@ document.getElementById('loadToday').addEventListener('click', async () => {
     matches = result.map(({ bolDate, ...m }) => m);
     // Auto-completar "FECHA X" si todos los partidos son del mismo matchday en fase de grupos
     const days = [...new Set(result.map(m => m.matchday).filter(Boolean))];
+    const stages = [...new Set(result.map(m => m.stage).filter(Boolean))];
     if (days.length === 1 && result.every(m => m.grp && m.grp.startsWith('GRUPO'))) {
       document.getElementById('ttlInput').value = 'FECHA ' + days[0];
       document.getElementById('faseInput').value = 'FASE DE GRUPOS';
+    } else if (stages.length === 1 && STAGE_ES[stages[0]]) {
+      document.getElementById('faseInput').value = STAGE_ES[stages[0]].fase;
+      document.getElementById('ttlInput').value = '';
     }
     renderRows(); renderCard();
     btn.textContent = `✅ ${result.length} partido(s) cargados`;
@@ -467,9 +482,13 @@ document.getElementById('loadToday').addEventListener('click', async () => {
     if (result.length) {
       matches = result.map(({ bolDate, ...m }) => m);
       const days = [...new Set(result.map(m => m.matchday).filter(Boolean))];
+      const stages = [...new Set(result.map(m => m.stage).filter(Boolean))];
       if (days.length === 1 && result.every(m => m.grp && m.grp.startsWith('GRUPO'))) {
         document.getElementById('ttlInput').value = 'FECHA ' + days[0];
         document.getElementById('faseInput').value = 'FASE DE GRUPOS';
+      } else if (stages.length === 1 && STAGE_ES[stages[0]]) {
+        document.getElementById('faseInput').value = STAGE_ES[stages[0]].fase;
+        document.getElementById('ttlInput').value = '';
       }
       renderRows(); renderCard();
     }
